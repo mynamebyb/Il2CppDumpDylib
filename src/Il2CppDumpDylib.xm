@@ -16,7 +16,7 @@
 static uintptr_t g_unityBase = 0;
 static uintptr_t g_unitySize = 0;
 
-static void find_unity_image(const mach_header* hdr, mach_header_t slide) {
+static void find_unity_image(const mach_header* hdr, intptr_t slide) {
     Dl_info info;
     if (dladdr(hdr, &info) == 0) return;
     NSString* path = [NSString stringWithUTF8String:info.dli_fname];
@@ -33,12 +33,12 @@ static void find_unity_image(const mach_header* hdr, mach_header_t slide) {
             cmd = (const segment_command_64*)((uintptr_t)cmd + cmd->cmdsize);
         }
         g_unitySize = maxEnd - (uintptr_t)h;
-        NSLog(@"[Dump] UnityFramework base=0x%lx size=0x%lx path=%@", g_unityBase, g_unitySize, path);
+        NSLog(@"[Dump] UnityFramework base=0x%lx size=0xlx path=%@", (unsigned long)g_unityBase, (unsigned long)g_unitySize, path);
     }
 }
 
 static void enumerate_unity(void) {
-    _dyld_register_func_for_add_image((void(*)(const mach_header*, uintptr_t))find_unity_image);
+    _dyld_register_func_for_add_image(find_unity_image);
 }
 
 #pragma mark - Dump: global-metadata.dat（扫内存找 magic）
@@ -70,7 +70,7 @@ static NSString* dump_metadata(void) {
                     }
                 }
                 if (maxEnd < 0x100000) maxEnd = 0x2000000;
-                NSLog(@"[Dump] version=%d estSize=%llu", ver, maxEnd);
+                NSLog(@"[Dump] version=%u estSize=%llu", ver, (unsigned long long)maxEnd);
 
                 NSMutableData* data = [NSMutableData dataWithLength:maxEnd];
                 uint8_t* out = (uint8_t*)data.mutableBytes;
@@ -89,8 +89,8 @@ static NSString* dump_metadata(void) {
                 NSString* doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
                 NSString* outFile = [doc stringByAppendingPathComponent:@"global-metadata.dat"];
                 [data writeToFile:outFile atomically:NO];
-                NSLog(@"[Dump] metadata written: %@ (%llu read)", outFile, done);
-                return [NSString stringWithFormat:@"metadata ✅ %llu bytes", maxEnd];
+                NSLog(@"[Dump] metadata written: %@ (%llu read)", outFile, (unsigned long long)done);
+                return [NSString stringWithFormat:@"metadata ✅ %llu bytes", (unsigned long long)maxEnd];
             }
         }
         address += size;
@@ -120,8 +120,8 @@ static NSString* dump_unity(void) {
     NSString* doc = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString* outFile = [doc stringByAppendingPathComponent:@"UnityFramework"];
     [data writeToFile:outFile atomically:NO];
-    NSLog(@"[Dump] UnityFramework written: %@ (%llu read / %llu)", outFile, done, g_unitySize);
-    return [NSString stringWithFormat:@"UnityFramework ✅ %llu read / %llu", done, g_unitySize];
+    NSLog(@"[Dump] UnityFramework written: %@ (%llu read / %lu)", outFile, (unsigned long long)done, (unsigned long)g_unitySize);
+    return [NSString stringWithFormat:@"UnityFramework ✅ %llu read / %lu", (unsigned long long)done, (unsigned long)g_unitySize];
 }
 
 #pragma mark - UI
