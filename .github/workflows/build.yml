@@ -1,0 +1,31 @@
+name: Build Il2CppDumpDylib
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Theos
+        run: |
+          brew install ldid
+          git clone --depth 1 https://github.com/theos/theos.git $HOME/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          make clean
+          make 2>&1 | tee build.log
+
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
+        with:
+          name: Il2CppDumpDylib-dylib
+          path: |
+            .theos/obj/**/*.dylib
+            build.log
