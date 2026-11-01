@@ -33,7 +33,7 @@ static void find_unity_image(const mach_header* hdr, intptr_t slide) {
             cmd = (const segment_command_64*)((uintptr_t)cmd + cmd->cmdsize);
         }
         g_unitySize = maxEnd - (uintptr_t)h;
-        NSLog(@"[Dump] UnityFramework base=0x%lx size=0xlx path=%@", (unsigned long)g_unityBase, (unsigned long)g_unitySize, path);
+        NSLog(@"[Dump] UnityFramework base=0x%lx size=0x%lx path=%@", (unsigned long)g_unityBase, (unsigned long)g_unitySize, path);
     }
 }
 
