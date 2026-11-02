@@ -25,13 +25,13 @@ jobs:
       - name: Copy dylib
         run: |
           mkdir -p output
-          find .theos -name "*.dylib" -exec cp {} output/ \;
-          ls -la output/
+          cp .theos/obj/debug/Il2CppDumpDylib.dylib output/
+          file output/Il2CppDumpDylib.dylib
 
       - name: Upload dylib
         uses: actions/upload-artifact@v4
         with:
           name: Il2CppDumpDylib-dylib
           path: |
-            output/*.dylib
+            output/Il2CppDumpDylib.dylib
             build.log
