@@ -22,10 +22,16 @@ jobs:
           make clean
           make 2>&1 | tee build.log
 
+      - name: Copy dylib
+        run: |
+          mkdir -p output
+          find .theos -name "*.dylib" -exec cp {} output/ \;
+          ls -la output/
+
       - name: Upload dylib
         uses: actions/upload-artifact@v4
         with:
           name: Il2CppDumpDylib-dylib
           path: |
-            .theos/obj/**/*.dylib
+            output/*.dylib
             build.log
